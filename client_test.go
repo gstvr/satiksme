@@ -58,13 +58,13 @@ func TestClient_GetStopDepartures(t *testing.T) {
 				{
 					Line:        Line{Number: "5", VehicleType: VehicleTypeTram},
 					Destination: "Iļģuciems",
-					DepartsAt:   fmtTime("15:41:07"),
+					DepartsAt:   fmtTime("13:41:07"),
 					VehicleID:   "31836",
 				},
 				{
 					Line:        Line{Number: "1", VehicleType: VehicleTypeTram},
 					Destination: "Imanta",
-					DepartsAt:   fmtTime("15:42:30"),
+					DepartsAt:   fmtTime("13:42:30"),
 					VehicleID:   "58545",
 					Flags:       []Flag{FlagAccessibleTram},
 				},
@@ -76,19 +76,19 @@ func TestClient_GetStopDepartures(t *testing.T) {
 				{
 					Line:        Line{Number: "22", VehicleType: VehicleTypeBus},
 					Destination: "Lidosta",
-					DepartsAt:   fmtTime("15:51:18"),
+					DepartsAt:   fmtTime("13:51:18"),
 					VehicleID:   "78661",
 				},
 				{
 					Line:        Line{Number: "27", VehicleType: VehicleTypeTrolleybus},
 					Destination: "Ziepniekkalns",
-					DepartsAt:   fmtTime("15:55:00"),
+					DepartsAt:   fmtTime("13:55:00"),
 					VehicleID:   "29179",
 				},
 				{
 					Line:        Line{Number: "23", VehicleType: VehicleTypeBus},
 					Destination: "Baloži",
-					DepartsAt:   fmtTime("15:55:00"),
+					DepartsAt:   fmtTime("13:55:00"),
 					VehicleID:   "71301",
 					Flags:       []Flag{FlagElectricBus},
 				},

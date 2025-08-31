@@ -88,8 +88,7 @@ func (c Client) GetStopDepartures(ctx context.Context, stopIDs []string) ([]Stop
 	}
 	defer res.Body.Close()
 
-	startOfDay := now.Truncate(24 * time.Hour)
-	//startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 	stops := make([]StopDepartures, 0, len(stopIDs))
 
 	s := bufio.NewScanner(res.Body)
