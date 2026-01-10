@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -43,21 +44,11 @@ type Departure struct {
 }
 
 func (d Departure) IsAccessibleTram() bool {
-	for _, f := range d.Flags {
-		if f == FlagAccessibleTram {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(d.Flags, FlagAccessibleTram)
 }
 
 func (d Departure) IsElectricBus() bool {
-	for _, f := range d.Flags {
-		if f == FlagElectricBus {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(d.Flags, FlagElectricBus)
 }
 
 func (d Departure) RelativeDeparture(relativeTo time.Time) string {

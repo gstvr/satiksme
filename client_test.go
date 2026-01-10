@@ -99,6 +99,13 @@ func TestClient_GetStopDepartures(t *testing.T) {
 	requireEquals(t, expected, actual)
 }
 
+func TestDeparture_RelativeDeparture(t *testing.T) {
+	now := time.Date(2025, 1, 1, 12, 0, 0, 0, time.UTC)
+	departsAt := now.Add(5*time.Minute + 59*time.Second) // it is expected to round down
+
+	requireEquals(t, "5 min", Departure{DepartsAt: departsAt}.RelativeDeparture(now))
+}
+
 func requireEquals(t *testing.T, expected, actual any) {
 	t.Helper()
 	if !reflect.DeepEqual(expected, actual) {
