@@ -1,0 +1,15 @@
+boards:
+  - name: "Downtown"
+    slug: "home-downtown"
+    stops:
+      - name: "Bērnu pasaule"
+        stop_ids: [ "3226", "3122" ]
+      - name: "Matīsa iela"
+        stop_ids: [ "0270" ]
+
+  - name: "Home"
+    slug: "downtown-home"
+    stops:
+      - name: "13. janvāra iela"
+        stop_ids: [ "3010" ]
+        line_filter: [ "tram-1"]

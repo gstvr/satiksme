@@ -42,6 +42,29 @@ type Departure struct {
 	Flags       []Flag
 }
 
+func (d Departure) IsAccessibleTram() bool {
+	for _, f := range d.Flags {
+		if f == FlagAccessibleTram {
+			return true
+		}
+	}
+	return false
+}
+
+func (d Departure) IsElectricBus() bool {
+	for _, f := range d.Flags {
+		if f == FlagElectricBus {
+			return true
+		}
+	}
+	return false
+}
+
+func (d Departure) RelativeDeparture(relativeTo time.Time) string {
+	departsIn := int(d.DepartsAt.Sub(relativeTo).Minutes())
+	return fmt.Sprintf("%d min", departsIn)
+}
+
 type StopDepartures struct {
 	StopID     string
 	Departures []Departure
