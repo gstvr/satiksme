@@ -106,6 +106,62 @@ func TestDeparture_RelativeDeparture(t *testing.T) {
 	requireEquals(t, "5 min", Departure{DepartsAt: departsAt}.RelativeDeparture(now))
 }
 
+func Test_parseDepartureTime(t *testing.T) {
+	strToTime := func(s string) time.Time {
+		parsed, _ := time.Parse(time.DateTime, s)
+		return parsed
+	}
+
+	tests := map[string]struct {
+		col        string
+		now        time.Time
+		startOfDay time.Time
+		expect     time.Time
+		expectErr  bool
+	}{
+		"same day departure": {
+			col:        "33180", // 9:13:00
+			now:        strToTime("2026-06-01 09:04:00"),
+			startOfDay: strToTime("2026-06-01 00:00:00"),
+			expect:     strToTime("2026-06-01 09:13:00"),
+		},
+		"overdue same day departure": {
+			// The data feed sometimes includes departures that are overdue,
+			// e.g., a vehicle that was scheduled to depart a minute ago but is still at the stop.
+			col:        "33180", // 9:13:00
+			now:        strToTime("2026-06-01 09:14:00"),
+			startOfDay: strToTime("2026-06-01 00:00:00"),
+			expect:     strToTime("2026-06-01 09:13:00"),
+		},
+		"departure tomorrow": {
+			col:        "87840", // 24h + 00:24:00
+			now:        strToTime("2026-06-01 09:33:00"),
+			startOfDay: strToTime("2026-06-01 00:00:00"),
+			expect:     strToTime("2026-06-02 00:24:00"),
+		},
+		"departure relative to the start of the previous day": {
+			col:        "87840", // 24h + 00:24:00
+			now:        strToTime("2026-06-02 00:15:00"),
+			startOfDay: strToTime("2026-06-02 00:00:00"),
+			expect:     strToTime("2026-06-02 00:24:00"),
+		},
+	}
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			actual, err := parseDepartureTime(tt.col, tt.now, tt.startOfDay)
+			if !tt.expectErr {
+				requireNoError(t, err)
+				requireEquals(t, tt.expect, actual)
+			} else {
+				if err == nil {
+					t.Error("expected error, got nil")
+				}
+			}
+		})
+	}
+}
+
 func requireEquals(t *testing.T, expected, actual any) {
 	t.Helper()
 	if !reflect.DeepEqual(expected, actual) {

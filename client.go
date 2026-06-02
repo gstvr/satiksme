@@ -130,18 +130,18 @@ func (c Client) GetStopDepartures(ctx context.Context, stopIDs []string) ([]Stop
 		colVehicleID := cols[4]
 		colDestination := cols[5]
 
-		departsAt, err := c.parseDepartureTime(colDepartureTime, startOfDay)
+		departsAt, err := parseDepartureTime(colDepartureTime, now, startOfDay)
 		if err != nil {
 			return nil, fmt.Errorf("parsing departure time: %w", err)
 		}
 
-		vehicleID, isAccessibleTram := c.parseVehicleID(colVehicleID)
+		vehicleID, isAccessibleTram := parseVehicleID(colVehicleID)
 
 		var flags []Flag
 		if isAccessibleTram {
 			flags = append(flags, FlagAccessibleTram)
 		}
-		if c.isElectricBus(vehicleID) {
+		if isElectricBus(vehicleID) {
 			flags = append(flags, FlagElectricBus)
 		}
 
@@ -162,7 +162,7 @@ func (c Client) GetStopDepartures(ctx context.Context, stopIDs []string) ([]Stop
 }
 
 // The feed returns departure times as the number of seconds since the start of the day.
-func (c Client) parseDepartureTime(col string, startOfDay time.Time) (time.Time, error) {
+func parseDepartureTime(col string, now, startOfDay time.Time) (time.Time, error) {
 	departureTimeInSeconds, err := strconv.Atoi(col)
 	if err != nil {
 		return time.Time{}, err
@@ -170,17 +170,23 @@ func (c Client) parseDepartureTime(col string, startOfDay time.Time) (time.Time,
 
 	// Sometimes the departure time is after midnight, but is considered as a departure on the previous day.
 	// The feed returns those relative to that day. So we need adjust it relative to the current day.
+	// Only cross-midnight departures (>= 86400s) are advanced to the next day if already past;
+	// same-day departures that are overdue are returned as-is.
 	const secondsInDay = 86400
-	if departureTimeInSeconds > secondsInDay {
-		departureTimeInSeconds -= secondsInDay
+	isCrossMidnight := departureTimeInSeconds >= secondsInDay
+	departureTimeInSeconds = departureTimeInSeconds % secondsInDay
+
+	departsAt := startOfDay.Add(time.Duration(departureTimeInSeconds) * time.Second)
+	if isCrossMidnight && departsAt.Before(now) {
+		departsAt = departsAt.Add(24 * time.Hour)
 	}
 
-	return startOfDay.Add(time.Duration(departureTimeInSeconds) * time.Second), nil
+	return departsAt, nil
 }
 
 // The feed suffixes the vehicle ID for accessible trams with "Z". The character is not part of the actual
 // vehicle ID and needs to be stripped to make sure the vehicle ID can be correctly used for other purposes.
-func (c Client) parseVehicleID(col string) (id string, isAccessibleTram bool) {
+func parseVehicleID(col string) (id string, isAccessibleTram bool) {
 	if strings.HasSuffix(col, "Z") {
 		return col[:len(col)-1], true
 	}
@@ -188,6 +194,6 @@ func (c Client) parseVehicleID(col string) (id string, isAccessibleTram bool) {
 }
 
 // All electric buses in Rigas Satiksme's fleet have a vehicle ID that starts with 71.
-func (c Client) isElectricBus(vehicleID string) bool {
+func isElectricBus(vehicleID string) bool {
 	return strings.HasPrefix(vehicleID, "71")
 }
